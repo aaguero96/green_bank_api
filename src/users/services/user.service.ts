@@ -7,6 +7,10 @@ import {
 import { GetUserByIdResponseDTO } from '../controllers/dtos/get-user-by-id.dto';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { SignUpRequestDTO } from '../controllers/dtos/sigup.dto';
+import { UserEntity } from '../entitities/user.entity';
+import { DeepPartial } from 'typeorm';
+import * as moment from 'moment';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -27,9 +31,39 @@ export class UserService implements IUserService {
 
     return {
       id: user.id,
-      name: user.username,
+      username: user.username,
       email: user.email,
       birthdate: user.birthdate,
     };
+  };
+
+  signUp = async (request: SignUpRequestDTO): Promise<void> => {
+    const userExists = await this._userRepository.userExists(
+      request.email,
+      request.username,
+    );
+    if (userExists) {
+      throw new RpcException({
+        code: status.ALREADY_EXISTS,
+        message: 'user alread exists',
+      });
+    }
+
+    const user: DeepPartial<UserEntity> = {
+      username: request.username,
+      birthdate: request.birthdate,
+      password: request.password,
+      email: request.email,
+    };
+
+    const age = moment().diff(moment(request.birthdate, 'YYYY-MM-DD'), 'years');
+    if (age < 18) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: 'user should is legal age',
+      });
+    }
+
+    await this._userRepository.create(user);
   };
 }

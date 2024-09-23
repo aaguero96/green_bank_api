@@ -4,7 +4,7 @@ export class GetUserByIdRequestDTO {
 
 export class GetUserByIdResponseDTO {
   id: string;
-  name: string;
+  username: string;
   email: string;
   birthdate: string;
 }

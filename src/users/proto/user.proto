@@ -8,11 +8,23 @@ message GetUserByIdRequest {
 
 message GetUserByIdResponse {
   string id = 1;
-  string name = 2;
+  string username = 2;
   string email = 3;
   string birthdate = 4;
 }
 
+message SignUpRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+  string birthdate = 4;
+}
+
+message SignUpResponse {
+  string message = 1;
+}
+
 service UserService {
   rpc GetUserById (GetUserByIdRequest) returns (GetUserByIdResponse) {}
+  rpc SignUp (SignUpRequest) returns (SignUpResponse) {}
 }
